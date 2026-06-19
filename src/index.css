@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Baloo 2", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+
+  --color-grape-500: #8b5cf6;
+  --color-sky-cute: #38bdf8;
+  --color-sunny: #fbbf24;
+  --color-mint: #34d399;
+  --color-coral: #fb7185;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html,
+body,
+#root {
+  background-color: #17152e;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+/* Kid-friendly defaults */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Hide scrollbars on the playful surfaces but keep scroll */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---- Printable worksheet ---- */
+#print-area {
+  display: none;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+.print-sheet {
+  color: #000;
+  font-family: var(--font-body);
+  padding: 24px 28px;
+}
+.print-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+.print-topic {
+  font-size: 16px;
+  margin-top: 2px;
+}
+.print-meta {
+  margin-top: 14px;
+  font-size: 14px;
+}
+.print-instr {
+  margin: 8px 0 18px;
+  font-size: 13px;
+  font-style: italic;
+}
+.print-list {
+  padding-left: 26px;
+}
+.print-item {
+  margin-bottom: 16px;
+  font-size: 15px;
+  break-inside: avoid;
+}
+.print-prompt {
+  font-weight: 600;
+  white-space: pre-wrap;
+}
+.print-choices {
+  margin-top: 4px;
+}
+.print-choice {
+  display: inline-block;
+  margin-right: 20px;
+}
+.print-answer {
+  margin-top: 6px;
+}
+.print-sat {
+  margin-top: 20px;
+  border-top: 2px solid #000;
+  padding-top: 12px;
+  break-inside: avoid;
+}
+.print-sat-title {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
