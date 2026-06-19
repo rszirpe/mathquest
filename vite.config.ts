@@ -7,6 +7,9 @@ import tailwindcss from '@tailwindcss/vite'
 const srcDir = decodeURIComponent(new URL('./src', import.meta.url).pathname)
 
 export default defineConfig({
+  // Relative asset paths so the built site works under any sub-folder
+  // (GitHub Pages project sites, etc.) instead of rendering blank.
+  base: './',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
