@@ -1,5 +1,9 @@
 # MathQuest — Design
 
+## Links
+
+- https://github.com/rszirpe/mathquest
+
 ## TL;DR mental model
 
 Grade → Topic World → 7 Sub-levels (difficulty rises each step). Each sub-level: **teach
@@ -78,33 +82,33 @@ Grade select -> Mode select -> {Adventure | Quick Play | Time Attack | Summer Br
 - Deployed to GitHub Pages via GitHub Actions (`base: './'` for sub-path hosting).
 
 ```
-+-------------------+       +----------------------+       +----------------+
-|   React Screens    | <-->  |    Zustand Stores     | -->   |  localStorage  |
-|  screens/*.tsx      |       |  usePlayerStore: data  |       |  autosave      |
-|  (Home, Adventure,  |       |   xp/coins/avatar/     |       |  key:          |
-|  Worksheet, Shop,   |       |   progress/history     |       |  mathquest-    |
-|  Challenges, ...)   |       |  useUiStore: nav/       |       |  save          |
-|                     |       |   session (transient)   |       |                |
-+-------------------+       +----------------------+       +----------------+
++-------------------+          +----------------------+         +----------------+
+| React Screens     |          | Zustand Stores       |         |                |
+| screens/*.tsx     |          | usePlayerStore: data |         | localStorage   |
+| (Home, Adventure, |   <-->   | xp/coins/avatar/     |   -->   | autosave       |
+| Worksheet, Shop,  |          | progress/history     |         | key:           |
+| Challenges, ...)  |          | useUiStore: nav/     |         | mathquest-save |
+|                   |          | session (transient)  |         |                |
++-------------------+          +----------------------+         +----------------+
 ```
 
 ```
-                              +-----------------------+
-                              |   Curriculum Engine    |
-                              |  curriculum.ts (worlds) |
-                              |  problems/* (generators)|
-                              |  explain.ts (visuals)   |
-                              +-----------+------------+
-                                          |
-                    +---------------------+---------------------+
-                    |                     |                      |
-            +-------v-------+     +-------v-------+     +--------v-------+
-            |  Game modes    |     |  Meta systems  |     |  Teacher tools |
-            |  Adventure     |     |  Avatar/Shop   |     |  Print         |
-            |  Quick Play    |     |  Challenges    |     |  Manual grade  |
-            |  Time Attack   |     |  Stats/History |     |  Signature     |
-            |  Summer Break  |     |                |     |  (password)    |
-            +----------------+     +----------------+     +----------------+
+                +-------------------------+
+                |    Curriculum Engine    |
+                |  curriculum.ts (worlds) |
+                | problems/* (generators) |
+                |   explain.ts (visuals)  |
+                +-------------------------+
+                             |
+        +--------------------+---------------------+
+        v                    v                     v
++--------------+     +---------------+     +---------------+
+|  Game modes  |     |  Meta systems |     | Teacher tools |
+|  Adventure   |     |  Avatar/Shop  |     |     Print     |
+|  Quick Play  |     |   Challenges  |     |  Manual grade |
+| Time Attack  |     | Stats/History |     |   Signature   |
+| Summer Break |     |               |     |   (password)  |
++--------------+     +---------------+     +---------------+
 ```
 
 ## Handoff
