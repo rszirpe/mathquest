@@ -15,6 +15,8 @@ import type {
   TopicId,
 } from '@/types'
 import { challengeProgress, initialChallenges, makeChallenge, type ChallengeSnapshot } from '@/lib/challenges'
+import { subLevelsForTopic } from '@/lib/curriculum'
+import type { PlacementResult } from '@/lib/ai'
 import {
   coinsForLevelUp,
   levelFromXp,
@@ -91,6 +93,8 @@ interface PlayerState {
   history: SheetRecord[]
   /** Active XP challenges. */
   challenges: Challenge[]
+  /** Result of the last Premium-tier placement test, if any. */
+  placement: PlacementResult | null
 
   setGrade: (grade: GradeLevel) => void
   recordSheet: (record: Omit<SheetRecord, 'id' | 'date'>) => void
@@ -111,6 +115,7 @@ interface PlayerState {
   setAdventureStars: (nodeId: string, stars: number) => void
   startSummer: (grade: GradeLevel) => void
   completeSummerLesson: (lessonId: string, nextIndex: number) => void
+  applyPlacementResult: (result: PlacementResult) => void
   resetProgress: () => void
 }
 
@@ -119,6 +124,7 @@ const initialSettings: Settings = {
   sound: true,
   teacherGrading: false,
   requireSignature: true,
+  premiumEnabled: false,
 }
 
 const initialStats: PlayerStats = {
@@ -152,6 +158,7 @@ export const usePlayerStore = create<PlayerState>()(
       settings: initialSettings,
       history: [],
       challenges: [],
+      placement: null,
 
       setGrade: (grade) => set({ grade }),
 
@@ -331,6 +338,27 @@ export const usePlayerStore = create<PlayerState>()(
         })
       },
 
+      applyPlacementResult: (result) => {
+        const state = get()
+        const grade = state.grade
+        if (!grade) {
+          set({ placement: result })
+          return
+        }
+        const progress = { ...state.progress }
+        for (const [topic, difficulty] of Object.entries(result.suggestedDifficulty) as [TopicId, number][]) {
+          const subLevels = subLevelsForTopic(grade, topic)
+          // Seed everything below the suggested step as passed; never auto-pass the trailing Review level.
+          const seedIndex = Math.max(0, Math.min(difficulty - 1, subLevels.length - 2))
+          for (const sl of subLevels) {
+            if (sl.index < seedIndex && !progress[sl.id]?.passed) {
+              progress[sl.id] = { best: Math.max(progress[sl.id]?.best ?? 0, WORKSHEET_PASS + 0.05), passed: true }
+            }
+          }
+        }
+        set({ placement: result, progress })
+      },
+
       resetProgress: () =>
         set({
           grade: get().grade,
@@ -346,11 +374,12 @@ export const usePlayerStore = create<PlayerState>()(
           needsPractice: [],
           history: [],
           challenges: [],
+          placement: null,
         }),
     }),
     {
       name: 'mathquest-save',
-      version: 4,
+      version: 5,
       // Preserve existing saves (xp/coins/avatar) across model upgrades.
       migrate: (persisted: unknown) => {
         const p = (persisted ?? {}) as Record<string, unknown>
@@ -361,6 +390,7 @@ export const usePlayerStore = create<PlayerState>()(
           history: p.history ?? [],
           challenges: p.challenges ?? [],
           settings: { ...initialSettings, ...((p.settings as object) ?? {}) },
+          placement: p.placement ?? null,
         }
       },
       partialize: (s) => ({
@@ -378,6 +408,7 @@ export const usePlayerStore = create<PlayerState>()(
         settings: s.settings,
         history: s.history,
         challenges: s.challenges,
+        placement: s.placement,
       }),
     },
   ),

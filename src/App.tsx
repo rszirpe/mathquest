@@ -11,6 +11,8 @@ import { ShopScreen } from '@/screens/ShopScreen'
 import { StatsScreen } from '@/screens/StatsScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
 import { ChallengesScreen } from '@/screens/ChallengesScreen'
+import { PlacementTestScreen } from '@/screens/PlacementTestScreen'
+import { ClassworkHelpScreen } from '@/screens/ClassworkHelpScreen'
 
 export default function App() {
   const screen = useUiStore((s) => s.screen)
@@ -51,6 +53,12 @@ export default function App() {
         break
       case 'challenges':
         content = <ChallengesScreen />
+        break
+      case 'placement':
+        content = <PlacementTestScreen />
+        break
+      case 'classwork':
+        content = <ClassworkHelpScreen />
         break
       default:
         content = <HomeScreen />

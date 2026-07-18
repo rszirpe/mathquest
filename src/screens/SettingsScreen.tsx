@@ -80,6 +80,10 @@ export function SettingsScreen() {
           <Toggle on={settings.sound} onClick={() => updateSettings({ sound: !settings.sound })} />
         </SettingRow>
 
+        <SettingRow title="Premium tier" desc="Unlocks Placement Test and Classwork Help on the home screen.">
+          <Toggle on={settings.premiumEnabled} onClick={() => updateSettings({ premiumEnabled: !settings.premiumEnabled })} />
+        </SettingRow>
+
         <div className="mt-3">
           {confirming ? (
             <div className="rounded-2xl bg-white/10 p-4 text-center backdrop-blur">

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart3, Palette, Play, Settings, Sun, Target } from 'lucide-react'
+import { BarChart3, ClipboardList, Palette, Play, Settings, Sparkles, Sun, Target } from 'lucide-react'
 import { usePlayerStore } from '@/store/usePlayerStore'
 import { useUiStore } from '@/store/useUiStore'
 import { Avatar } from '@/components/Avatar'
@@ -13,6 +13,7 @@ export function HomeScreen() {
   const xp = usePlayerStore((s) => s.xp)
   const coins = usePlayerStore((s) => s.coins)
   const grade = usePlayerStore((s) => s.grade)
+  const premiumEnabled = usePlayerStore((s) => s.settings.premiumEnabled)
   const cur = grade ? getCurriculum(grade) : null
 
   return (
@@ -63,6 +64,12 @@ export function HomeScreen() {
         <MenuTile icon={<Palette size={24} />} label="Customize" onClick={() => go('shop')} />
         <MenuTile icon={<Sun size={24} />} label="Summer" onClick={() => go('summer')} />
         <MenuTile icon={<BarChart3 size={24} />} label="My Stats" onClick={() => go('stats')} />
+        {premiumEnabled && (
+          <>
+            <MenuTile icon={<Sparkles size={24} />} label="Placement Test" onClick={() => go('placement')} />
+            <MenuTile icon={<ClipboardList size={24} />} label="Classwork Help" onClick={() => go('classwork')} />
+          </>
+        )}
       </div>
       </div>
     </div>

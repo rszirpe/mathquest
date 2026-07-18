@@ -115,6 +115,8 @@ export interface Settings {
   teacherGrading: boolean
   /** A graded sheet must be signed by the teacher before it's finished. */
   requireSignature: boolean
+  /** Unlocks the Premium tier (placement test + classwork help) on the home screen. */
+  premiumEnabled: boolean
 }
 
 export interface SheetRecord {

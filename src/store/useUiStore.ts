@@ -13,6 +13,8 @@ export type Screen =
   | 'stats'
   | 'settings'
   | 'challenges'
+  | 'placement'
+  | 'classwork'
 
 export interface PlaySession {
   mode: GameMode
