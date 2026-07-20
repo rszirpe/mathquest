@@ -108,6 +108,15 @@ export interface NeedsPracticeEntry {
   score: number // percent 0..1
 }
 
+/** A sub-level flagged for a redo after a missed SAT Star Test question — separate from
+ * `progress`, since `progress.passed` is monotonic and can't be safely unset. */
+export interface RedoFlag {
+  id: string
+  topic: TopicId
+  title: string
+  flaggedAt: number // epoch ms
+}
+
 export interface Settings {
   satForYoungKids: boolean
   sound: boolean

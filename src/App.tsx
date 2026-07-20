@@ -13,6 +13,8 @@ import { SettingsScreen } from '@/screens/SettingsScreen'
 import { ChallengesScreen } from '@/screens/ChallengesScreen'
 import { PlacementTestScreen } from '@/screens/PlacementTestScreen'
 import { ClassworkHelpScreen } from '@/screens/ClassworkHelpScreen'
+import { SatStarTestScreen } from '@/screens/SatStarTestScreen'
+import { SatStarShopScreen } from '@/screens/SatStarShopScreen'
 
 export default function App() {
   const screen = useUiStore((s) => s.screen)
@@ -59,6 +61,12 @@ export default function App() {
         break
       case 'classwork':
         content = <ClassworkHelpScreen />
+        break
+      case 'satstar':
+        content = <SatStarTestScreen />
+        break
+      case 'satstarshop':
+        content = <SatStarShopScreen />
         break
       default:
         content = <HomeScreen />

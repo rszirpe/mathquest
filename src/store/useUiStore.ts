@@ -15,6 +15,8 @@ export type Screen =
   | 'challenges'
   | 'placement'
   | 'classwork'
+  | 'satstar'
+  | 'satstarshop'
 
 export interface PlaySession {
   mode: GameMode

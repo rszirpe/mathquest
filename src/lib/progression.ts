@@ -67,3 +67,12 @@ export function worksheetCoins(percent: number): number {
   if (percent >= 0.8) return 5
   return 0
 }
+
+// ---- SAT Star Test bonus payout (separate from the passive per-answer earn rate) ----
+
+export function satStarsForScore(percent: number): number {
+  if (percent >= 0.96) return 75
+  if (percent >= 0.91) return 50
+  if (percent >= 0.8) return 25
+  return 10
+}

@@ -2,19 +2,41 @@ import { useState } from 'react'
 import { usePlayerStore } from '@/store/usePlayerStore'
 import { useUiStore } from '@/store/useUiStore'
 import { ScreenHeader } from '@/components/ScreenHeader'
-import { topicTitle } from '@/lib/curriculum'
+import { subLevelsForTopic, topicTitle } from '@/lib/curriculum'
 import { levelFromXp } from '@/lib/progression'
 import type { TopicId } from '@/types'
 
 export function StatsScreen() {
   const back = useUiStore((s) => s.back)
+  const startSession = useUiStore((s) => s.startSession)
   const stats = usePlayerStore((s) => s.stats)
   const xp = usePlayerStore((s) => s.xp)
   const coins = usePlayerStore((s) => s.coins)
+  const grade = usePlayerStore((s) => s.grade)
   const resetProgress = usePlayerStore((s) => s.resetProgress)
   const needsPractice = usePlayerStore((s) => s.needsPractice)
+  const redoLevels = usePlayerStore((s) => s.redoLevels)
   const history = usePlayerStore((s) => s.history)
   const [confirming, setConfirming] = useState(false)
+
+  const startRedo = (id: string, topic: TopicId, title: string) => {
+    if (!grade) return
+    const sl = subLevelsForTopic(grade, topic).find((s) => s.id === id)
+    if (!sl) return
+    startSession({
+      mode: 'adventure',
+      title,
+      topics: [topic],
+      difficulty: sl.difficulty,
+      count: 20,
+      isReview: sl.isReview,
+      guided: !sl.isReview,
+      subLevelId: sl.id,
+      topic,
+      grade,
+      returnTo: 'stats',
+    })
+  }
 
   const level = levelFromXp(xp).level
   const accuracy = stats.totalSolved > 0 ? Math.round((stats.totalCorrect / stats.totalSolved) * 100) : 0
@@ -65,6 +87,27 @@ export function StatsScreen() {
                 <span className="text-sm font-bold text-slate-700">{e.title}</span>
                 <span className="text-sm font-extrabold text-rose-500">{Math.round(e.score * 100)}%</span>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {redoLevels.length > 0 && (
+        <div className="mx-auto mt-5 w-full max-w-4xl rounded-3xl bg-white p-4 shadow-lg">
+          <div className="font-display mb-1 text-lg font-black text-amber-600">Redo these levels</div>
+          <div className="mb-3 text-xs font-semibold text-slate-400">
+            Missed on a SAT Star Test — a quick redo locks in the fundamentals.
+          </div>
+          <div className="flex flex-col gap-2">
+            {redoLevels.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => startRedo(f.id, f.topic, f.title)}
+                className="flex items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-left transition active:scale-95"
+              >
+                <span className="text-sm font-bold text-slate-700">{f.title}</span>
+                <span className="text-sm font-extrabold text-amber-600">Redo →</span>
+              </button>
             ))}
           </div>
         </div>

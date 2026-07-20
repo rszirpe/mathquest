@@ -41,6 +41,20 @@ layer (print, manual grade, password-gated signature requirement, full history).
 - **Premium tier (future):** a Gemini-driven placement test (a few questions auto-place the
   student's level), and a "help with my classwork" mode (show outside classwork, get hints,
   answer, then comprehension problems).
+- **Next goal — SAT Stars economy:** a new currency, separate from XP/coins — earned by solving
+  problems, or purchased directly — spent to unlock SAT Star tests.
+  - Not a rehash of the drill — you already learned the skill, this is "now use it in the real
+    world": real-world-style application problems, not the same practice questions again.
+  - Each question includes an "explain how you got this answer" field — but it is **not graded**.
+    It's just there for parents/teachers to see the student's thinking, for fun/visibility only.
+  - Wrong answer → no Gemini check here, just "try again" — **2 attempts** per problem (not 5).
+  - Graded **per problem, immediately on submit** — not batched at the end like the 20-Q
+    worksheet.
+  - Any problem missed sends the student back to redo the sub-level where that concept was
+    originally taught — fundamentals come first.
+  - Redo levels (from missed SAT Star problems) are reachable from the Stats screen.
+  - Finishing a SAT Star test pays out more SAT Stars by score, on top of any redo requirement:
+    below 80% → 10, 80–90% → 25, 91–95% → 50, 96–100% → 75.
 - SAT bonus questions must be *real* SAT questions — pull from the official SAT site and pick the
   easiest ones appropriate to the grade being taught, not invented puzzles.
 - Keep problems from repeating often — already solved for the worksheet engine; don't regress it.

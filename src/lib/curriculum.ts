@@ -1,4 +1,4 @@
-import type { GradeLevel, SubLevel, TopicId } from '@/types'
+import type { GradeLevel, SubLevel, SubLevelProgress, TopicId } from '@/types'
 
 export interface Lesson {
   id: string
@@ -234,4 +234,17 @@ export function worldsForGrade(grade: GradeLevel): World[] {
     emoji: WORLD_EMOJI[t.id] ?? '⭐',
     subLevels: subLevelsForTopic(grade, t.id),
   }))
+}
+
+/** The non-Review sub-level teaching a topic at a given difficulty; falls back to Review. */
+export function subLevelForDifficulty(grade: GradeLevel, topic: TopicId, difficulty: number): SubLevel {
+  const subs = subLevelsForTopic(grade, topic)
+  return subs.find((sl) => !sl.isReview && sl.difficulty === difficulty) ?? subs[subs.length - 1]
+}
+
+/** Topics the student has passed at least one sub-level in — the "already learned" pool. */
+export function topicsPassed(grade: GradeLevel, progress: Record<string, SubLevelProgress>): TopicId[] {
+  return worldsForGrade(grade)
+    .filter((w) => w.subLevels.some((sl) => progress[sl.id]?.passed))
+    .map((w) => w.topic)
 }

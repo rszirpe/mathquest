@@ -7,6 +7,7 @@ import type {
   NeedsPracticeEntry,
   PlayerStats,
   Problem,
+  RedoFlag,
   Settings,
   SheetRecord,
   ShopItem,
@@ -15,7 +16,7 @@ import type {
   TopicId,
 } from '@/types'
 import { challengeProgress, initialChallenges, makeChallenge, type ChallengeSnapshot } from '@/lib/challenges'
-import { subLevelsForTopic } from '@/lib/curriculum'
+import { subLevelForDifficulty, subLevelsForTopic, topicTitle } from '@/lib/curriculum'
 import type { PlacementResult } from '@/lib/ai'
 import {
   coinsForLevelUp,
@@ -23,6 +24,7 @@ import {
   xpForAnswer,
   COINS_PER_CORRECT,
   scoreBand,
+  satStarsForScore,
   worksheetCoins,
   worksheetXp,
   WORKSHEET_PASS,
@@ -63,6 +65,19 @@ export interface ClaimResult {
   newLevel: number
 }
 
+export interface SatStarTestResult {
+  percent: number
+  correct: number
+  total: number
+  starsEarned: number
+  newRedoFlags: RedoFlag[]
+}
+
+export interface PurchaseResult {
+  ok: boolean
+  message: string
+}
+
 function challengeSnapshot(state: { stats: PlayerStats; history: SheetRecord[]; progress: Record<string, SubLevelProgress> }): ChallengeSnapshot {
   return {
     totalSolved: state.stats.totalSolved,
@@ -95,6 +110,10 @@ interface PlayerState {
   challenges: Challenge[]
   /** Result of the last Premium-tier placement test, if any. */
   placement: PlacementResult | null
+  /** SAT Stars — earned by solving problems (same rate as coins) or purchased, spent on SAT Star Tests. */
+  satStars: number
+  /** Sub-levels flagged for a redo after a missed SAT Star Test question. */
+  redoLevels: RedoFlag[]
 
   setGrade: (grade: GradeLevel) => void
   recordSheet: (record: Omit<SheetRecord, 'id' | 'date'>) => void
@@ -116,6 +135,9 @@ interface PlayerState {
   startSummer: (grade: GradeLevel) => void
   completeSummerLesson: (lessonId: string, nextIndex: number) => void
   applyPlacementResult: (result: PlacementResult) => void
+  spendSatStars: (amount: number) => boolean
+  recordSatStarTest: (args: { grade: GradeLevel; results: { problem: Problem; correct: boolean }[] }) => SatStarTestResult
+  purchaseSatStarPack: (packId: string) => PurchaseResult
   resetProgress: () => void
 }
 
@@ -159,6 +181,8 @@ export const usePlayerStore = create<PlayerState>()(
       history: [],
       challenges: [],
       placement: null,
+      satStars: 0,
+      redoLevels: [],
 
       setGrade: (grade) => set({ grade }),
 
@@ -201,6 +225,7 @@ export const usePlayerStore = create<PlayerState>()(
         const after = levelFromXp(newXp)
         const leveledUp = after.level > prevLevel
         const coinsGained = (correct ? COINS_PER_CORRECT : 0) + (leveledUp ? coinsForLevelUp(after.level) : 0)
+        const satStarsGained = correct ? COINS_PER_CORRECT : 0
 
         const prevTopic = state.stats.byTopic[problem.topic] ?? { solved: 0, correct: 0 }
         const newStats: PlayerStats = {
@@ -219,6 +244,7 @@ export const usePlayerStore = create<PlayerState>()(
         set({
           xp: newXp,
           coins: state.coins + coinsGained,
+          satStars: state.satStars + satStarsGained,
           streak: newStreak,
           stats: newStats,
         })
@@ -253,17 +279,27 @@ export const usePlayerStore = create<PlayerState>()(
 
         const progress = { ...state.progress }
         let needsPractice = state.needsPractice
+        let redoLevels = state.redoLevels
         if (subLevelId) {
           const prev = progress[subLevelId] ?? { best: 0, passed: false }
           progress[subLevelId] = { best: Math.max(prev.best, percent), passed: prev.passed || passed }
           if (passed) {
             needsPractice = needsPractice.filter((e) => e.id !== subLevelId)
+            redoLevels = redoLevels.filter((f) => f.id !== subLevelId)
           } else {
             needsPractice = [...needsPractice.filter((e) => e.id !== subLevelId), { id: subLevelId, topic, title, score: percent }]
           }
         }
 
-        set({ xp: newXp, coins: state.coins + coinsGained, stats: newStats, progress, needsPractice })
+        set({
+          xp: newXp,
+          coins: state.coins + coinsGained,
+          satStars: state.satStars + worksheetCoins(percent),
+          stats: newStats,
+          progress,
+          needsPractice,
+          redoLevels,
+        })
         return { percent, band, passed, xpGained: baseXp, coinsGained, leveledUp, newLevel: after.level }
       },
 
@@ -359,6 +395,40 @@ export const usePlayerStore = create<PlayerState>()(
         set({ placement: result, progress })
       },
 
+      spendSatStars: (amount) => {
+        const state = get()
+        if (state.satStars < amount) return false
+        set({ satStars: state.satStars - amount })
+        return true
+      },
+
+      recordSatStarTest: ({ grade, results }) => {
+        const state = get()
+        const total = results.length
+        const correct = results.filter((r) => r.correct).length
+        const percent = total > 0 ? correct / total : 0
+        const starsEarned = satStarsForScore(percent)
+
+        const redoLevels = [...state.redoLevels]
+        const newRedoFlags: RedoFlag[] = []
+        for (const r of results) {
+          if (r.correct) continue
+          const sl = subLevelForDifficulty(grade, r.problem.topic, r.problem.difficulty)
+          if (redoLevels.some((f) => f.id === sl.id)) continue
+          const flag: RedoFlag = { id: sl.id, topic: sl.topic, title: `${topicTitle(sl.topic)} · ${sl.title}`, flaggedAt: Date.now() }
+          redoLevels.push(flag)
+          newRedoFlags.push(flag)
+        }
+
+        set({ satStars: state.satStars + starsEarned, redoLevels })
+        return { percent, correct, total, starsEarned, newRedoFlags }
+      },
+
+      purchaseSatStarPack: () => {
+        // Stub — no payment processor wired yet. This is the seam for a future integration.
+        return { ok: false, message: 'Payments are coming soon — this is just a preview of the store.' }
+      },
+
       resetProgress: () =>
         set({
           grade: get().grade,
@@ -375,11 +445,13 @@ export const usePlayerStore = create<PlayerState>()(
           history: [],
           challenges: [],
           placement: null,
+          satStars: 0,
+          redoLevels: [],
         }),
     }),
     {
       name: 'mathquest-save',
-      version: 5,
+      version: 6,
       // Preserve existing saves (xp/coins/avatar) across model upgrades.
       migrate: (persisted: unknown) => {
         const p = (persisted ?? {}) as Record<string, unknown>
@@ -391,6 +463,8 @@ export const usePlayerStore = create<PlayerState>()(
           challenges: p.challenges ?? [],
           settings: { ...initialSettings, ...((p.settings as object) ?? {}) },
           placement: p.placement ?? null,
+          satStars: p.satStars ?? 0,
+          redoLevels: p.redoLevels ?? [],
         }
       },
       partialize: (s) => ({
@@ -409,6 +483,8 @@ export const usePlayerStore = create<PlayerState>()(
         history: s.history,
         challenges: s.challenges,
         placement: s.placement,
+        satStars: s.satStars,
+        redoLevels: s.redoLevels,
       }),
     },
   ),
