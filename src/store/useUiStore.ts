@@ -17,6 +17,7 @@ export type Screen =
   | 'classwork'
   | 'satstar'
   | 'satstarshop'
+  | 'gradevideos'
 
 export interface PlaySession {
   mode: GameMode
@@ -51,11 +52,14 @@ interface UiState {
   session: PlaySession | null
   /** The topic "world" currently open in the sub-level screen. */
   selectedTopic: TopicId | null
+  /** When set, the intro-video overlay plays this grade's clip on demand (review, any progress). */
+  reviewVideoGrade: GradeLevel | null
   go: (screen: Screen) => void
   back: () => void
   openWorld: (topic: TopicId) => void
   startSession: (session: PlaySession) => void
   endSession: () => void
+  setReviewVideoGrade: (grade: GradeLevel | null) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -63,6 +67,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   history: [],
   session: null,
   selectedTopic: null,
+  reviewVideoGrade: null,
 
   go: (screen) => set({ history: [...get().history, get().screen], screen }),
 
@@ -84,4 +89,6 @@ export const useUiStore = create<UiState>((set, get) => ({
     h.pop()
     set({ screen: session?.returnTo ?? 'home', session: null, history: h })
   },
+
+  setReviewVideoGrade: (grade) => set({ reviewVideoGrade: grade }),
 }))

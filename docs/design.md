@@ -67,6 +67,8 @@ layer (print, manual grade, password-gated signature requirement, full history).
     picker, mode select, or a worksheet.
   - Files are bundled in the app under `public/videos/`, mapped grade -> filename. No save-state
     or persistence changes are needed (dismissal is transient), so no save-version bump.
+  - A "Grade Videos" button on Home opens a K-5 picker to re-watch any grade's intro on demand
+    (plays in the same overlay, independent of progress or the currently selected grade).
 
 ## User flow
 

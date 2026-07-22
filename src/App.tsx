@@ -15,6 +15,7 @@ import { PlacementTestScreen } from '@/screens/PlacementTestScreen'
 import { ClassworkHelpScreen } from '@/screens/ClassworkHelpScreen'
 import { SatStarTestScreen } from '@/screens/SatStarTestScreen'
 import { SatStarShopScreen } from '@/screens/SatStarShopScreen'
+import { GradeVideosScreen } from '@/screens/GradeVideosScreen'
 import { IntroVideoOverlay } from '@/components/IntroVideoOverlay'
 
 export default function App() {
@@ -68,6 +69,9 @@ export default function App() {
         break
       case 'satstarshop':
         content = <SatStarShopScreen />
+        break
+      case 'gradevideos':
+        content = <GradeVideosScreen />
         break
       default:
         content = <HomeScreen />

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart3, ClipboardList, Palette, Play, Settings, Sparkles, Star, Sun, Target } from 'lucide-react'
+import { BarChart3, ClipboardList, Film, Palette, Play, Settings, Sparkles, Star, Sun, Target } from 'lucide-react'
 import { usePlayerStore } from '@/store/usePlayerStore'
 import { useUiStore } from '@/store/useUiStore'
 import { Avatar } from '@/components/Avatar'
@@ -66,6 +66,7 @@ export function HomeScreen() {
         <MenuTile icon={<Sun size={24} />} label="Summer" onClick={() => go('summer')} />
         <MenuTile icon={<BarChart3 size={24} />} label="My Stats" onClick={() => go('stats')} />
         <MenuTile icon={<Star size={24} />} label={`SAT Stars · ${satStars} 🌟`} onClick={() => go('satstar')} />
+        <MenuTile icon={<Film size={24} />} label="Grade Videos" onClick={() => go('gradevideos')} />
         {premiumEnabled && (
           <>
             <MenuTile icon={<Sparkles size={24} />} label="Placement Test" onClick={() => go('placement')} />

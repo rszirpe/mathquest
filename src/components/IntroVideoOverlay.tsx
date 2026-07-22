@@ -6,7 +6,7 @@ import { getCurriculum, worldsForGrade } from '@/lib/curriculum'
 import type { GradeLevel } from '@/types'
 
 /** Per-grade orientation clip, played when a child opens a grade with zero progress. */
-const INTRO_VIDEO_BY_GRADE: Record<GradeLevel, string> = {
+export const INTRO_VIDEO_BY_GRADE: Record<GradeLevel, string> = {
   K: 'Building_a_Math_Foundation_Kindergarden.mp4',
   '1': 'CA_First-Grade_Math_Framework.mp4',
   '2': 'Illusion_of_Mastery_in_Math_second_grade.mp4',
@@ -16,17 +16,21 @@ const INTRO_VIDEO_BY_GRADE: Record<GradeLevel, string> = {
 }
 
 /**
- * Shows a grade's intro video over the Home screen when the child has zero progress on that grade.
- * Replays on every zero-progress visit (dismissal is transient); it stops for good once any
- * worksheet for the grade is graded, which adds a `progress` entry.
+ * Plays a grade's intro video as a full-screen overlay. Two triggers:
+ *  - Auto: over Home while the child has zero progress on the current grade (replays every visit;
+ *    stops for good once any worksheet is graded, which adds a `progress` entry).
+ *  - Review: `useUiStore.reviewVideoGrade` set from the Grade Videos picker plays that grade's clip
+ *    on demand, regardless of progress or which grade is selected. Review takes precedence.
  */
 export function IntroVideoOverlay() {
   const grade = usePlayerStore((s) => s.grade)
   const progress = usePlayerStore((s) => s.progress)
   const screen = useUiStore((s) => s.screen)
+  const reviewVideoGrade = useUiStore((s) => s.reviewVideoGrade)
+  const setReviewVideoGrade = useUiStore((s) => s.setReviewVideoGrade)
   const [dismissed, setDismissed] = useState<GradeLevel | null>(null)
 
-  // Re-arm the video whenever the selected grade changes.
+  // Re-arm the auto video whenever the selected grade changes.
   useEffect(() => {
     setDismissed(null)
   }, [grade])
@@ -36,11 +40,15 @@ export function IntroVideoOverlay() {
     [grade, progress],
   )
 
-  // Gate to Home so the overlay never covers the grade picker, mode select, or a worksheet.
-  if (!grade || screen !== 'home' || !zeroProgress || dismissed === grade) return null
+  // Review wins; otherwise fall back to the zero-progress auto-play gated to Home.
+  const autoShow = !!grade && screen === 'home' && zeroProgress && dismissed !== grade
+  const activeGrade = reviewVideoGrade ?? (autoShow ? grade : null)
+  if (!activeGrade) return null
 
-  const c = getCurriculum(grade)
-  const src = `${import.meta.env.BASE_URL}videos/${INTRO_VIDEO_BY_GRADE[grade]}`
+  const isReview = reviewVideoGrade !== null
+  const c = getCurriculum(activeGrade)
+  const src = `${import.meta.env.BASE_URL}videos/${INTRO_VIDEO_BY_GRADE[activeGrade]}`
+  const close = () => (isReview ? setReviewVideoGrade(null) : setDismissed(activeGrade))
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 p-6">
@@ -52,7 +60,8 @@ export function IntroVideoOverlay() {
       >
         <div className="font-display mb-3 text-center text-2xl font-black text-white drop-shadow">
           <span className="mr-2">{c.emoji}</span>
-          {grade === 'K' ? 'Kindergarten' : `Grade ${grade}`} — Let's get started!
+          {activeGrade === 'K' ? 'Kindergarten' : `Grade ${activeGrade}`}
+          {isReview ? ' — Intro' : " — Let's get started!"}
         </div>
         <video
           key={src}
@@ -63,10 +72,10 @@ export function IntroVideoOverlay() {
           className="max-h-[70vh] w-full rounded-2xl bg-black shadow-2xl"
         />
         <button
-          onClick={() => setDismissed(grade)}
+          onClick={close}
           className="font-display mt-5 rounded-2xl bg-white px-8 py-3 text-lg font-extrabold text-indigo-600 shadow-lg transition active:scale-95"
         >
-          Continue →
+          {isReview ? 'Done' : 'Continue →'}
         </button>
       </motion.div>
     </div>
