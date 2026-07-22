@@ -58,6 +58,15 @@ layer (print, manual grade, password-gated signature requirement, full history).
 - SAT bonus questions must be *real* SAT questions — pull from the official SAT site and pick the
   easiest ones appropriate to the grade being taught, not invented puzzles.
 - Keep problems from repeating often — already solved for the worksheet engine; don't regress it.
+- **Grade intro videos:** when a child opens a grade they have *zero progress* on, a short
+  per-grade orientation clip plays over the Home screen before they start — one video per
+  grade (K-5).
+  - Replays on every zero-progress visit (and on reload); it stops for good once they complete
+    any worksheet for that grade (progress > 0).
+  - Dismissible with a "Continue" button; gated to the Home screen so it never covers the grade
+    picker, mode select, or a worksheet.
+  - Files are bundled in the app under `public/videos/`, mapped grade -> filename. No save-state
+    or persistence changes are needed (dismissal is transient), so no save-version bump.
 
 ## User flow
 

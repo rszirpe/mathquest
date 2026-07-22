@@ -15,6 +15,7 @@ import { PlacementTestScreen } from '@/screens/PlacementTestScreen'
 import { ClassworkHelpScreen } from '@/screens/ClassworkHelpScreen'
 import { SatStarTestScreen } from '@/screens/SatStarTestScreen'
 import { SatStarShopScreen } from '@/screens/SatStarShopScreen'
+import { IntroVideoOverlay } from '@/components/IntroVideoOverlay'
 
 export default function App() {
   const screen = useUiStore((s) => s.screen)
@@ -73,5 +74,10 @@ export default function App() {
     }
   }
 
-  return <div className="h-full overflow-y-auto">{content}</div>
+  return (
+    <>
+      <div className="h-full overflow-y-auto">{content}</div>
+      <IntroVideoOverlay />
+    </>
+  )
 }
